@@ -13,11 +13,13 @@ COPY main.go main.go
 COPY util/ util/
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -a -o generator main.go
 
-FROM alpine:latest
+FROM alpine:3.15
 WORKDIR /app
 RUN apk add openvpn jq openssl
+RUN apk add wireguard-tools
 COPY logs/ logs/
 COPY ovpn/ ovpn/
+COPY wireguard/ wireguard/
 COPY generate-certs.sh generate-certs.sh
 RUN chmod +x generate-certs.sh
 COPY --from=builder /app/generator /app/generator

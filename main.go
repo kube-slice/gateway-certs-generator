@@ -58,8 +58,31 @@ func main() {
 	pkiPrivate := fmt.Sprintf("%s/ovpn/pki/private/%s.key", workDir, serverId)
 	pkiCa := fmt.Sprintf("%s/ovpn/pki/ca.crt", workDir)
 	serverOvpnConf := fmt.Sprintf("%s/ovpn/%s/server-openvpn.conf", workDir, vpnFQDN)
-
+	wgServerPrivateKey := fmt.Sprintf("%s/wireguard/%s/server_private.key", workDir, vpnFQDN)
+	wgServerPublicKey := fmt.Sprintf("%s/wireguard/%s/server_public.key", workDir, vpnFQDN)
+	wgClientPrivateKey := fmt.Sprintf("%s/wireguard/%s/client_private.key", workDir, vpnFQDN)
+	wgClientPublicKey := fmt.Sprintf("%s/wireguard/%s/client_public.key", workDir, vpnFQDN)
 	serverCcd := fmt.Sprintf("%s/ovpn/%s/ccd", workDir, vpnFQDN)
+	wgServerPrivateKeyFile, err := readFile(wgServerPrivateKey)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	wgServerPublicKeyFile, err := readFile(wgServerPublicKey)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	wgClientPrivateKeyFile, err := readFile(wgClientPrivateKey)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	wgClientPublicKeyFile, err := readFile(wgClientPublicKey)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
 	serverCcdFile, err := readFile(serverCcd)
 	if err != nil {
 		logger.Error(err)
@@ -136,19 +159,23 @@ func main() {
 	clientSecret := corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{Name: clientId},
 		Data: map[string][]byte{
-			"ovpnConfigFile": clientOvpnFile,
+			"ovpnConfigFile":         clientOvpnFile,
+			"serverPublicKeyWgFile":  wgServerPublicKeyFile,
+			"clientPrivateKeyWgFile": wgClientPrivateKeyFile,
 		},
 	}
 	serverSecret := corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{Name: serverId},
 		Data: map[string][]byte{
-			"ovpnConfigFile":    serverOvpnConfFile,
-			"pkiDhPemFile":      dhPemFile,
-			"pkiTAKeyFile":      taKeyFile,
-			"pkiIssuedCertFile": pkiIssuedFile,
-			"pkiPrivateKeyFile": pkiPrivateFile,
-			"pkiCACertFile":     pkiCaFile,
-			"ccdFile":           serverCcdFile,
+			"ovpnConfigFile":         serverOvpnConfFile,
+			"pkiDhPemFile":           dhPemFile,
+			"pkiTAKeyFile":           taKeyFile,
+			"pkiIssuedCertFile":      pkiIssuedFile,
+			"pkiPrivateKeyFile":      pkiPrivateFile,
+			"pkiCACertFile":          pkiCaFile,
+			"ccdFile":                serverCcdFile,
+			"clientPublicKeyWgFile":  wgClientPublicKeyFile,
+			"serverPrivateKeyWgFile": wgServerPrivateKeyFile,
 		}}
 	// delete any existing secrets present
 	_ = clientset.CoreV1().Secrets(namespace).Delete(context.TODO(), clientSecret.Name, v1.DeleteOptions{})

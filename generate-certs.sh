@@ -31,6 +31,11 @@ validateInput
 
 printParams
 
+#generate wireguard key
+echo generating wireguard keys
+chmod +x ./wireguard/scripts/gen_key.sh
+./wireguard/scripts/gen_key.sh
+
 # All parameters satisfied, begin the work.
 echo Generating OVPN Configuration
 
@@ -58,6 +63,7 @@ iterateCertPairRequest processIndividualCertRequest
 
 #updateSliceGatewayCRD
 # ... and done!
+
 ./generator
 #completeCleanup
 #todo: enable clean up after verification

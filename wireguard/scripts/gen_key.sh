@@ -8,3 +8,5 @@ wg genkey | tee ${WORK_DIR}/wireguard/${VPN_FQDN}/server_private.key | wg pubkey
 
 # Generate Client keypair
 wg genkey | tee ${WORK_DIR}/wireguard/${VPN_FQDN}/client_private.key | wg pubkey > ${WORK_DIR}/wireguard/${VPN_FQDN}/client_public.key
+
+./generator
